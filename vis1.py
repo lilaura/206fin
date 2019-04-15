@@ -7,19 +7,9 @@ import unittest
 import requests
 import datetime
 
-#For Lufthansa API
-flight_key="zejvcb5vfcub7kyb22jv5grm"
-flight_secret="7MYH4x8aRS"
-
-#Getting access token from Lufthansa
-r_token=requests.post('https://api.lufthansa.com/v1/oauth/token',data={
-                     'client_id':flight_key,
-                     'client_secret':flight_secret,
-                     'grant_type':'client_credentials'
-                     })
-
-s_token=r_token.json()
-access_token=s_token['access_token']
+#For Cirium Flight API
+flight_id="8ab51357"
+flight_key="92daab56f079dc523afab96f0a5ef06a"
 
 #Generating date stings
 #TO BE UPDATED
@@ -29,16 +19,15 @@ for i in range(1,32):
     date_lst.append(date)
 
 #Connecting the database
-conn1=sqlite3.connect('Lufthansa.sqlite')
-cur1=conn1.cursor()
+conn=sqlite3.connect('db_fin.sqlite')
+cur=conn.cursor()
 
 #Setting up the table
-cur1.execute('DROP TABLE IF EXISTS Fares')
-cur1.execute('CREATE TABLE Fares (origin TEXT, destination TEXT, travel_date TIMESTAMP, cabin TEXT, adult_traveler INTEGER)')
+cur.execute('CREATE TABLE IF NOT EXISTS Flights (year TEXT, month TEXT, day TEXT, hour TEXT, scheduled_gate_dep TIMESTAMP, actual_gate_dep TIMESTAMP)')
 
-#Requesting flight fare data from Lufthansa API
-#at least 100 rows?
-#the best way to limit number of requests each time?
+#Requesting historical flight data from Cirium Flight API; departing from DTW, 120hrs starting from 19-04-01T00:00
+
+
 
 
 if __name__ == "__main__":

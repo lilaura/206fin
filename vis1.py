@@ -19,6 +19,18 @@ cur=conn.cursor()
 cur.execute('CREATE TABLE IF NOT EXISTS Flights (year TEXT, month TEXT, day TEXT, hour TEXT, scheduled_gate_dep TIMESTAMP, actual_gate_dep TIMESTAMP)')
 
 #define read_cache and write_cache functions
+def read_cache(cache_file):
+    fr=open(cache_file)
+    s=fr.read()
+    d=json.loads(s)
+    fr.close()
+    return d
+
+def write_cache(cache_file,cache_d):
+    fw=open(cache_file,"w")
+    js=json.dumps(cache_d)
+    fw.write(js)
+    fw.close()
 
 #Create days and hours lists to plug in requests url
 days=[]

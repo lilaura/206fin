@@ -16,7 +16,7 @@ conn=sqlite3.connect('db_fin.sqlite')
 cur=conn.cursor()
 
 #Setting up the table
-cur.execute('CREATE TABLE IF NOT EXISTS Flights (year TEXT, month TEXT, day TEXT, hour TEXT, scheduled_gate_dep TIMESTAMP, actual_gate_dep TIMESTAMP)')
+cur.execute('CREATE TABLE IF NOT EXISTS Flights (year TEXT, month TEXT, day TEXT, hour TEXT, flight_id TEXT, scheduled_runway_dep TIMESTAMP, actual_runway_dep TIMESTAMP, scheduled_runway_arr TIMESTAMP, actual_runway_arr TIMESTAMP)')
 
 #define read_cache and write_cache functions
 def read_cache(cache_file):
@@ -45,7 +45,17 @@ hours=hours*5
 #Requesting historical flight data from Cirium Flight API; departing from DTW, 120hrs starting from 19-04-01T00:00
 for i in range(120):
     r=requests.get('https://api.flightstats.com/flex/flightstatus/historical/rest/v3/json/airport/status/DTW/dep/2019/4/{}/{}'.format(days[i],hours[i]),params={'appId':flight_id, 'appKey':flight_key, 'utc':False, 'numHours':'1', 'maxFlights':'20'})
-    s=r.json()
+    dict=r.json()
+    
+    #checking to see if dup data exists in database
+    for flight in dict['flightStatuses']:
+        cur.execute('SELECT * FROM Flights WHERE flight_id=?',flight['flightId'])
+        try:
+            data=cur.fetchone()[0]
+            print ("Found in database")
+            continue
+        except:
+            pass
 
 
 

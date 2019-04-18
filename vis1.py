@@ -22,9 +22,6 @@ cur.execute('CREATE TABLE IF NOT EXISTS Airports (name TEXT, city TEXT, state TE
 r=requests.get('https://api.flightstats.com/flex/airports/rest/v1/json/countryCode/US', params={'appId':flightAPI_id, 'appKey':flightAPI_key})
 js=r.json()
 airport_lst=js['airports']
-fw=open("airport_data.json",'w')
-fw.write(fw)
-fw.close()
 
 #Adding items to database
 count=0
@@ -33,9 +30,8 @@ for airport in airport_lst:
         print("Added 20 items to database; restart to add more")
         break
     
-    
     #checking to see if dup data exists in database
-    cur.execute('SELECT * FROM Airports WHERE name=?',airport['name'])
+    cur.execute('SELECT name FROM Airports WHERE name=?',(airport['name'],))
     try:
         data=cur.fetchone()[0]
         print ("Found in database")
@@ -43,8 +39,7 @@ for airport in airport_lst:
     except:
         pass
 
-
-    cur.execute('INSERT INTO Flights (name, city, state, latitude, longitude, elevation, active_status) VALUES (?,?,?,?,?,?,?)',(airport['name'],airport['city'],airport['stateCode'],airport['latitude'],airport['longitude'],airport['elevation'],airport['active']))
+    cur.execute('INSERT INTO Airports (name, city, state, latitude, longitude, elevation, active_status) VALUES (?,?,?,?,?,?,?)',(airport['name'],airport['city'],airport['stateCode'],airport['latitude'],airport['longitude'],airport['elevationFeet'],airport['active']))
     conn.commit()
     count+=1
 

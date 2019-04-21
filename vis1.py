@@ -50,16 +50,29 @@ def add_airport_to_db(conn, cur, airport_lst):
 #get longtitude and latitue from airport table in database
 
 def add_weather_to_db(conn, cur):
+    count = 0
     cur.execute('SELECT latitude, longitude FROM Airports')
+    l = []
     for row in cur:
-        lat = row[0] 
-        lng = row[1]
+        l.append(row)
+    for ro in l:
+        lat = ro[0] 
+        lng = ro[1]
         weatherurl = ("https://api.darksky.net/forecast/662c5daaecc7bc6892843b225162afac/{},{}").format(lat,lng)
         r1 = requests.get(weatherurl)
+        count += 1
         data1 = json.loads(r1.text)
-        data2 = data1["daily"]["data"][0]
-        cur.execute('INSERT INTO Weather (latitude, longitude, time_zone, precip_int, wind_speed, visibility) VALUES (?,?,?,?,?,?)', (data1["latitude"],data1["longitude"],data1["timezone"],data2["precipIntensity"], data2["windSpeed"],data2["visibility"]))
-        conn.commit()
+        lat2 = data1["latitude"]
+        lng2 = data1["longitude"]
+        time = data1["timezone"]
+        precip = data1["daily"]["data"][0]["precipIntensity"]
+        wind = data1["daily"]["data"][0]["windSpeed"]
+        vis = data1["daily"]["data"][0]["visibility"]
+        
+        cur.execute('INSERT INTO Weather (latitude, longitude, time_zone, precip_int, wind_speed, visibility) VALUES(?, ?, ?, ?, ?, ?)', (lat2,lng2,time,precip,wind, vis))
+    
+    conn.commit()
+    print(count)
 
 
 

@@ -3,9 +3,9 @@ SI206 Final Project
 Name: Ariel Huang, Laura Li
 Team name: Zima
 
-This project contains a report, Python code file, png visualization files, and a sqlite database.
+This project contains a report ("SI206 Final Project Report.pdf"), Python code files ("vis1.py" and "vis2.py"), visualization png files, and a sqlite database ("db_fin_new.sqlite").
 
-xxxxx
+Instructions:
 Start with running vis1.py
 database will be populated 20 items at a time
 Then run vis2.py to create calculations and visualizations

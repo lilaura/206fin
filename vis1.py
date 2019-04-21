@@ -30,7 +30,6 @@ def add_airport_to_db(conn, cur, airport_lst):
         cur.execute('SELECT name FROM Airports WHERE name=?',(airport['name'],))
         try:
             data=cur.fetchone()[0]
-            print ("Found in database")
             continue
         except:
             pass
@@ -48,7 +47,6 @@ def add_airport_to_db(conn, cur, airport_lst):
 
 def add_weather_to_db(conn, cur,longlatlist):
     for row in longlatlist:
-        cur.execute('SELECT latitude FROM Weather WHERE latitude=?',(row[0],))
         try:
             data=cur.fetchone()[0]
             continue
@@ -61,12 +59,13 @@ def add_weather_to_db(conn, cur,longlatlist):
         data1 = json.loads(r1.text)
         lat2 = data1["latitude"]
         lng2 = data1["longitude"]
-        time = data1["timezone"]
         precip = data1["daily"]["data"][0]["precipIntensity"]
         wind = data1["daily"]["data"][0]["windSpeed"]
         vis = data1["daily"]["data"][0]["visibility"]
+        tempmax = data1["daily"]["data"][0]["temperatureMax"]
+        tempmin = data1["daily"]["data"][0]["temperatureMin"]
         
-        cur.execute('INSERT INTO Weather (latitude, longitude, time_zone, precip_int, wind_speed, visibility) VALUES(?, ?, ?, ?, ?, ?)', (lat2,lng2,time,precip,wind, vis))
+        cur.execute('INSERT INTO Weather (latitude, longitude, precip_int, wind_speed, visibility, temp_high, temp_low) VALUES(?, ?, ?, ?, ?,?,?)', (lat2,lng2,precip,wind,vis,tempmax,tempmin))
     
     conn.commit()
 
@@ -76,7 +75,7 @@ if __name__ == "__main__":
     conn=sqlite3.connect('db_fin_new.sqlite')
     cur=conn.cursor()
     cur.execute('CREATE TABLE IF NOT EXISTS Airports (name TEXT, city TEXT, state TEXT, latitude REAL, longitude REAL, elevation REAL, time_zone TEXT)')
-    cur.execute('CREATE TABLE IF NOT EXISTS Weather (latitude REAL, longitude REAL, time_zone TEXT, precip_int REAL, wind_speed REAL, visibility REAL)')
+    cur.execute('CREATE TABLE IF NOT EXISTS Weather (latitude REAL, longitude REAL, precip_int REAL, wind_speed REAL, visibility REAL, temp_high REAL, temp_low REAL)')
     get_airport_lst(flightAPI_id, flightAPI_key)
     airport_lst = get_airport_lst(flightAPI_id,flightAPI_key)
     longlatlist = add_airport_to_db(conn, cur, airport_lst)

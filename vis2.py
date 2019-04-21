@@ -14,21 +14,40 @@ def write_calculation(calc_file, calc_dict):
     fw.write(dumped_json) # write the JSON
     fw.close() 
 
-def calc_avg_elev(conn, cur,):
+def calc_avg_elev(conn, cur):
     cur.execute('SELECT state, elevation FROM Airports ORDER BY state')
-    d={}
+    avg_elev={}
     for row in cur:
         state=row[0]
         elevation=row[1]
-        d[state]=d.get(state,[]).append(elevation)
-    for key in d:
-        d[key]=sum(d[key])/len(d[key])
-    return d
+        avg_elev[state]=avg_elev.get(state,[]).append(elevation)
+    for key in avg_elev:
+        avg_elev[key]=sum(avg_elev[key])/len(avg_elev[key])
+    return avg_elev
 
+def sort_elev_top_ten(elev_dict):
+    top_sort=sorted(elev_dict.items(),key=lambda t: t[1],reverse=True)
+    return top_sort[:10]
 
+def barchart_avg_elev_by_state(elev_dict):
+    x=[]
+    y=[]
+    for item in sort_elev_top_ten(elev_dict):
+        x.append(item[0])
+        y.append(item[1])
+    fig, ax=plt.subplots()
+    ax.bar(x,y)
+    ax.set_xlabel('State')
+    ax.set_ylabel('Average elevation of all airports')
+    ax.set_title('Top10 States in average airport elevation')
+    fig.savefig('HW10Pt2.png')
+    plt.show()
 
 
 if __name__ == "__main__":
     conn=sqlite3.connect('db_fin_new.sqlite')
     cur=conn.cursor()
-    
+    calc_avg_elev(conn,cur)
+    elev_dict=calc_avg_elev(conn,cur)
+    #write_calculation("calc.json",elev_dict)
+    barchart_avg_elev_by_state(elev_dict)

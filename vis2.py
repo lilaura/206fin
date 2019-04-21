@@ -13,6 +13,7 @@ def write_calculation(calc_file, calc_dict):
     fw = open(calc_file,"w") # open the cache file
     fw.write(dumped_json) # write the JSON
     fw.close() 
+
 def calc_avg_elev(conn, cur,):
     cur.execute('SELECT state, elevation FROM Airports ORDER BY state')
     d={}
@@ -24,7 +25,6 @@ def calc_avg_elev(conn, cur,):
         d[key]=sum(d[key])/len(d[key])
     return d
 
-def 
 
 
 

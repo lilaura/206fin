@@ -12,11 +12,11 @@ flightAPI_id="8ab51357"
 flightAPI_key="92daab56f079dc523afab96f0a5ef06a"
 
 #Connecting the database
-conn=sqlite3.connect('db_fin.sqlite')
+conn=sqlite3.connect('db_fin_new.sqlite')
 cur=conn.cursor()
 
 #Setting up the table
-cur.execute('CREATE TABLE IF NOT EXISTS Airports (name TEXT, city TEXT, state TEXT, latitude REAL, longitude REAL, elevation REAL, active_status TEXT)')
+cur.execute('CREATE TABLE IF NOT EXISTS Airports (name TEXT, city TEXT, state TEXT, latitude REAL, longitude REAL, elevation REAL, time_zone TEXT)')
 
 #Requesting airport data from Cirium Flight API
 r=requests.get('https://api.flightstats.com/flex/airports/rest/v1/json/countryCode/US', params={'appId':flightAPI_id, 'appKey':flightAPI_key})
@@ -39,10 +39,9 @@ for airport in airport_lst:
     except:
         pass
 
-    if airport['active']=='1':
-        cur.execute('INSERT INTO Airports (name, city, state, latitude, longitude, elevation, active_status) VALUES (?,?,?,?,?,?,?)',(airport['name'],airport['city'],airport['stateCode'],airport['latitude'],airport['longitude'],airport['elevationFeet'],airport['active']))
-        conn.commit()
-        count+=1
+    cur.execute('INSERT INTO Airports (name, city, state, latitude, longitude, elevation, time_zone) VALUES (?,?,?,?,?,?,?)',(airport['name'],airport['city'],airport['stateCode'],airport['latitude'],airport['longitude'],airport['elevationFeet'],airport['timeZoneRegionName']))
+    conn.commit()
+    count+=1
 
 
 if __name__ == "__main__":

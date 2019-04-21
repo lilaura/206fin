@@ -3,7 +3,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import sqlite3
 import json
-import unittest
 import requests
 import time
 
@@ -14,7 +13,7 @@ def write_calculation(calc_file, calc_dict):
     fw.write(dumped_json) # write the JSON
     fw.close() 
 
-def calc_avg_elev(conn, cur,):
+def calc_avg_elev(conn, cur):
     cur.execute('SELECT state, elevation FROM Airports ORDER BY state')
     d={}
     for row in cur:
@@ -25,6 +24,26 @@ def calc_avg_elev(conn, cur,):
         d[key]=sum(d[key])/len(d[key])
     return d
 
+def avg_temp(conn,cur):
+    d = {}
+    templist = []
+    preciplist = []
+    vislist = []
+    lnglist = []
+    latlist = []
+    windlist = []
+    cur.execute('SELECT temp_high, temp_low,latitude, longitude, precip_int, wind_speed, visibility from Weather')
+    for row in cur:
+        templist.append((row[0]+row[1])/2)
+        preciplist.append(row[4])
+        vislist.append(row[6])
+        latlist.append(row[2])
+    d["longitude"] = lnglist
+    d["latitude"] = latlist
+    d["temprature"] = templist
+    d["visibility"] = vislist
+    d["precipitation"] = preciplist
+    d["wind speed"] = windlist
 
 
 

@@ -39,9 +39,11 @@ for airport in airport_lst:
     except:
         pass
 
-    cur.execute('INSERT INTO Airports (name, city, state, latitude, longitude, elevation, active_status) VALUES (?,?,?,?,?,?,?)',(airport['name'],airport['city'],airport['stateCode'],airport['latitude'],airport['longitude'],airport['elevationFeet'],airport['active']))
-    conn.commit()
-    count+=1
+    if airport['active']=='1':
+        cur.execute('INSERT INTO Airports (name, city, state, latitude, longitude, elevation, active_status) VALUES (?,?,?,?,?,?,?)',(airport['name'],airport['city'],airport['stateCode'],airport['latitude'],airport['longitude'],airport['elevationFeet'],airport['active']))
+        conn.commit()
+        count+=1
+
 
 if __name__ == "__main__":
     

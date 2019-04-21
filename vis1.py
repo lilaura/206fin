@@ -45,6 +45,21 @@ for airport in airport_lst:
         count+=1
 
 
+#get longtitude and latitue from airport table in database
+cur.execute('SELECT latitude, longtitude FROM Airports')
+count = 0
+for row in cur:
+    if (count > 20):
+        count = 0
+        break
+    count += 1
+    lat = row[0] 
+    lng = row[1]
+    weatherurl = ("https://api.darksky.net/forecast/662c5daaecc7bc6892843b225162afac/{},{}").format(lat,lng)
+    r1 =requests.get(weatherurl)
+    js1 = r.json()
+
+
 if __name__ == "__main__":
     
     pass

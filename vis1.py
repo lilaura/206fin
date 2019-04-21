@@ -44,7 +44,7 @@ def add_airport_to_db(conn, cur, airport_lst):
 
 #get longtitude and latitue from airport table in database
 
-def add_weather_to_db(conn, cur):
+def add_weather_to_db(conn, cur,longlatlist):
     count = 0
     cur.execute('SELECT latitude, longitude FROM Airports')
     l = []
@@ -78,5 +78,5 @@ if __name__ == "__main__":
     cur.execute('CREATE TABLE IF NOT EXISTS Weather (latitude REAL, longitude REAL, time_zone TEXT, precip_int REAL, wind_speed REAL, visibility REAL)')
     get_airport_lst(flightAPI_id, flightAPI_key)
     airport_lst = get_airport_lst(flightAPI_id,flightAPI_key)
-    add_airport_to_db(conn, cur, airport_lst)
-    add_weather_to_db(conn, cur)
+    longlatlist = add_airport_to_db(conn, cur, airport_lst)
+    add_weather_to_db(conn, cur, longlatlist)

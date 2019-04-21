@@ -1,9 +1,6 @@
 # Import statements
-import matplotlib
-import matplotlib.pyplot as plt
 import sqlite3
 import json
-import unittest
 import requests
 import time
 

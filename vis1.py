@@ -10,14 +10,7 @@ import time
 #For Cirium Flight API
 flightAPI_id="8ab51357"
 flightAPI_key="92daab56f079dc523afab96f0a5ef06a"
-
-#Connecting the database
-conn=sqlite3.connect('db_fin_new.sqlite')
-cur=conn.cursor()
-
-#Setting up the Airports table
-cur.execute('CREATE TABLE IF NOT EXISTS Airports (name TEXT, city TEXT, state TEXT, latitude REAL, longitude REAL, elevation REAL, time_zone TEXT)')
-
+    
 #Requesting airport data from Cirium Flight API
 def get_airport_lst(APIid,APIkey):
     r=requests.get('https://api.flightstats.com/flex/airports/rest/v1/json/countryCode/US', params={'appId':APIid, 'appKey':APIkey})
@@ -25,10 +18,9 @@ def get_airport_lst(APIid,APIkey):
     airport_lst=js['airports']
     return airport_lst
 
-airport_lst=get_airport_lst(flightAPI_id,flightAPI_key)
 
 #Adding items to database
-def add_airport_to_db(airport_lst):
+def add_airport_to_db(conn, cur, airport_lst):
     count=0
     for airport in airport_lst:
         if count>20:
@@ -51,23 +43,27 @@ def add_airport_to_db(airport_lst):
 
 
 #get longtitude and latitue from airport table in database
-cur.execute('CREATE TABLE IF NOT EXISTS Weather (latitude REAL, longitude REAL, time_zone TEXT, precip_int REAL, wind_speed REAL, visibility REAL)')
 
-cur.execute('SELECT latitude, longtitude FROM Airports')
-count = 0
-for row in cur:
-    lat = row[0] 
-    lng = row[1]
-    weatherurl = ("https://api.darksky.net/forecast/662c5daaecc7bc6892843b225162afac/{},{}").format(lat,lng)
-    r1 = requests.get(weatherurl)
-    data1 = json.loads(r1.text)
-    data2 = data1["daily"]["data"][0]
-    cur.execute('INSERT INTO Weather (latitude, longitude, time_zone, precip_int, wind_speed, visibility) VALUES (?,?,?,?,?,?)', (data1["latitude"],data1["longitude"],data1["timezone"],data2["precipIntensity"], data2["windSpeed"],data2["visibility"]))
-    conn.commit()
-    count += 1
+def add_weather_to_db(conn, cur):
+    cur.execute('SELECT latitude, longitude FROM Airports')
+    for row in cur:
+        lat = row[0] 
+        lng = row[1]
+        weatherurl = ("https://api.darksky.net/forecast/662c5daaecc7bc6892843b225162afac/{},{}").format(lat,lng)
+        r1 = requests.get(weatherurl)
+        data1 = json.loads(r1.text)
+        data2 = data1["daily"]["data"][0]
+        cur.execute('INSERT INTO Weather (latitude, longitude, time_zone, precip_int, wind_speed, visibility) VALUES (?,?,?,?,?,?)', (data1["latitude"],data1["longitude"],data1["timezone"],data2["precipIntensity"], data2["windSpeed"],data2["visibility"]))
+        conn.commit()
 
 
 
 if __name__ == "__main__":
-    
-    pass
+    conn=sqlite3.connect('db_fin_new.sqlite')
+    cur=conn.cursor()
+    cur.execute('CREATE TABLE IF NOT EXISTS Airports (name TEXT, city TEXT, state TEXT, latitude REAL, longitude REAL, elevation REAL, time_zone TEXT)')
+    cur.execute('CREATE TABLE IF NOT EXISTS Weather (latitude REAL, longitude REAL, time_zone TEXT, precip_int REAL, wind_speed REAL, visibility REAL)')
+    get_airport_lst(flightAPI_id, flightAPI_key)
+    airport_lst = get_airport_lst(flightAPI_id,flightAPI_key)
+    add_airport_to_db(conn, cur, airport_lst)
+    add_weather_to_db(conn, cur)

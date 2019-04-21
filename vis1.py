@@ -46,18 +46,21 @@ for airport in airport_lst:
 
 
 #get longtitude and latitue from airport table in database
+cur.execute('CREATE TABLE IF NOT EXISTS Weather (latitude REAL, longitude REAL, time_zone TEXT, precip_int REAL, wind_speed REAL, visibility REAL)')
+
 cur.execute('SELECT latitude, longtitude FROM Airports')
 count = 0
 for row in cur:
-    if (count > 20):
-        count = 0
-        break
-    count += 1
     lat = row[0] 
     lng = row[1]
     weatherurl = ("https://api.darksky.net/forecast/662c5daaecc7bc6892843b225162afac/{},{}").format(lat,lng)
-    r1 =requests.get(weatherurl)
-    js1 = r.json()
+    r1 = requests.get(weatherurl)
+    data1 = json.loads(r1.text)
+    data2 = data1["daily"]["data"][0]
+    cur.execute('INSERT INTO Weather (latitude, longitude, time_zone, precip_int, wind_speed, visibility) VALUES (?,?,?,?,?,?)', (data1["latitude"],data1["longitude"],data1["timezone"],data2["precipIntensity"], data2["windSpeed"],data2["visibility"]))
+    conn.commit()
+    count += 1
+
 
 
 if __name__ == "__main__":

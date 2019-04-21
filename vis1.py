@@ -21,9 +21,11 @@ def get_airport_lst(APIid,APIkey):
 
 #Adding items to database
 def add_airport_to_db(conn, cur, airport_lst):
-    count = 0
+    count=0
+    lat_lng_lst=[]
+
     for airport in airport_lst:
-        if count >= 20:
+        if count>=20:
               print("Added 20 items to database; restart to add more")
               break
     
@@ -37,9 +39,12 @@ def add_airport_to_db(conn, cur, airport_lst):
             pass
 
         if airport['active']==1:
-              cur.execute('INSERT INTO Airports (name, city, state, latitude, longitude, elevation, time_zone) VALUES (?,?,?,?,?,?,?)',(airport['name'],airport['city'],airport['stateCode'],airport['latitude'],airport['longitude'],airport['elevationFeet'],airport['timeZoneRegionName']))
-              conn.commit()
-              count+=1
+            lat_lng_lst.append((airport['latitude'],airport['longitude']))
+            cur.execute('INSERT INTO Airports (name, city, state, latitude, longitude, elevation, time_zone) VALUES (?,?,?,?,?,?,?)',(airport['name'],airport['city'],airport['stateCode'],airport['latitude'],airport['longitude'],airport['elevationFeet'],airport['timeZoneRegionName']))
+            conn.commit()
+            count+=1
+    return lat_lng_lst
+
 
 
 #get longtitude and latitue from airport table in database

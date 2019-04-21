@@ -49,18 +49,18 @@ def add_airport_to_db(conn, cur, airport_lst):
 
 #get longtitude and latitue from airport table in database
 
-def add_weather_to_db(conn, cur):
-    count = 0
-    cur.execute('SELECT latitude, longitude FROM Airports')
-    l = []
-    for row in cur:
-        l.append(row)
-    for ro in l:
-        lat = ro[0] 
-        lng = ro[1]
+def add_weather_to_db(conn, cur,longlatlist):
+    for row in longlatlist:
+        cur.execute('SELECT latitude FROM Weather WHERE latitude=?',(row[0],))
+        try:
+            data=cur.fetchone()[0]
+            continue
+        except:
+            pass
+        lat = row[0] 
+        lng = row[1]
         weatherurl = ("https://api.darksky.net/forecast/662c5daaecc7bc6892843b225162afac/{},{}").format(lat,lng)
         r1 = requests.get(weatherurl)
-        count += 1
         data1 = json.loads(r1.text)
         lat2 = data1["latitude"]
         lng2 = data1["longitude"]
@@ -72,7 +72,6 @@ def add_weather_to_db(conn, cur):
         cur.execute('INSERT INTO Weather (latitude, longitude, time_zone, precip_int, wind_speed, visibility) VALUES(?, ?, ?, ?, ?, ?)', (lat2,lng2,time,precip,wind, vis))
     
     conn.commit()
-    print(count)
 
 
 
@@ -83,5 +82,5 @@ if __name__ == "__main__":
     cur.execute('CREATE TABLE IF NOT EXISTS Weather (latitude REAL, longitude REAL, time_zone TEXT, precip_int REAL, wind_speed REAL, visibility REAL)')
     get_airport_lst(flightAPI_id, flightAPI_key)
     airport_lst = get_airport_lst(flightAPI_id,flightAPI_key)
-    add_airport_to_db(conn, cur, airport_lst)
-    add_weather_to_db(conn, cur)
+    longlatlist = add_airport_to_db(conn, cur, airport_lst)
+    add_weather_to_db(conn, cur, longlatlist)

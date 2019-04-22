@@ -7,6 +7,7 @@ import time
 #For Cirium Flight API
 flightAPI_id="8ab51357"
 flightAPI_key="92daab56f079dc523afab96f0a5ef06a"
+call_lim = 20
     
 #Requesting airport data from Cirium Flight API
 def get_airport_lst(APIid,APIkey):
@@ -22,7 +23,7 @@ def add_airport_to_db(conn, cur, airport_lst):
     lat_lng_lst=[]
 
     for airport in airport_lst:
-        if count>=20:
+        if count>=call_lim:
               print("Added 20 items to database; restart to add more")
               break
     

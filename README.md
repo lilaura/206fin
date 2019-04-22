@@ -1,6 +1,8 @@
 # 206fin
 SI206 Final Project
+
 Name: Ariel Huang, Laura Li
+
 Team name: Zima
 
 This project contains a report ("SI206 Final Project Report.pdf"), Python code files ("vis1.py" and "vis2.py"), visualization png files, and a sqlite database ("db_fin_new.sqlite").

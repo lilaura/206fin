@@ -1,3 +1,4 @@
+# Laura Li, Ariel Huang
 # Import statements
 import matplotlib
 import matplotlib.pyplot as plt
@@ -15,13 +16,18 @@ import plotly.graph_objs as go
 import numpy as np 
 plotly.tools.set_credentials_file(username='ilaurali', api_key = 'BQa9lpMPhgZinYACdL1l')
 
+def write_csv(calc_file, calc_lst, elev_dict):
+    with open(calc_file,'w') as out:
+        csv_out=csv.writer(out)
+        csv_out.writerow(['lgn','lat','temperature','wind speed','precipitation', 'visibility'])
+        for row in calc_lst:
+            csv_out.writerow(row)
+        csv_out.writerow([])   
+        csv_out.writerow(['state', 'average elevation of airports'])
+        for a,b in elev_dict.items():
+            csv_out.writerow([a,b])
+    
 
-def write_calculation(calc_file, calc_dict):
-
-    dumped_json = json.dumps(calc_dict) # serialize dictionary to a JSON formatted string 
-    fw = open(calc_file,"w") # open the cache file
-    fw.write(dumped_json) # write the JSON
-    fw.close() 
 
 def calc_avg_elev(conn, cur):
     cur.execute('SELECT state, elevation FROM Airports ORDER BY state')
@@ -34,66 +40,49 @@ def calc_avg_elev(conn, cur):
         avg_elev[key]=sum(avg_elev[key])/len(avg_elev[key])
     return avg_elev
 
-def avg_temp(conn,cur):
+def map_calc(conn,cur):
     d = []
-    """templist = []
-    preciplist = []
-    vislist = []
-    lnglist = []
-    latlist = []
-    windlist = []"""
     cur.execute('SELECT temp_high, temp_low,latitude, longitude, precip_int, wind_speed, visibility from Weather')
-    count = 1
     for row in cur:
-        d.append({"lgn": row[3], "lat": row[2], "wind speed": row[5], "temperature": ((row[0]+row[1])/2)})
-        count += 1
-    """
-        templist.append((row[0]+row[1])/2)
-        preciplist.append(row[4])
-        vislist.append(row[6])
-        latlist.append(row[2])
-        windlist.append(row[5])
-        lnglist.append(row[3])
-    sorted(windlist,reverse = True)
-    d["longitude"] = lnglist
-    d["latitude"] = latlist
-    d["temprature"] = templist
-    d["visibility"] = vislist
-    d["precipitation"] = preciplist
-    d["wind speed"] = windlist"""
+        d.append([row[3], row[2], row[5], (row[0]+row[1])/2, row[4], row[6]])
+    d = sorted(d, key=lambda row: row[2], reverse=True)
     return d
 
-def bubble_map(map_dict):
-    df = pd.read_json(json.dumps(map_dict))
-
-    #df['text'] = str(df['visibility']) +' visibility'
-    limits = [(0,5),(6,40),(41,95),(96,150),(151,320)]
+def bubble_map(csvfile):
+    df = pd.read_csv(csvfile,nrows=321)
     
+    df.head()
+
+    df['text'] = 'Wind Speed: ' + (df['wind speed']).astype(str) + '<br>Visibility: ' + (df['visibility']).astype(str) + '<br>Precipitation: ' + (df['precipitation']).astype(str)
+    limits = [(0,6),(7,41),(42,92),(93,141),(142,320)]
+    legends = [(73,79),(69,72),(63,69),(53,63),(2,53)]
+    colors = ["red","yellow","green","blue","lightgrey"]
     airports1 = []
 
     for i in range(len(limits)):
         lim = limits[i]
+        leg = legends[i]
         df_sub = df[lim[0]:lim[1]]
         port = go.Scattergeo(
             locationmode = 'USA-states',
             lon = df_sub['lgn'],
             lat = df_sub['lat'],
-            #text = df_sub['text'],
+            text = df_sub['text'],
             marker = go.scattergeo.Marker(
-                size = df_sub['wind speed']*5,
-                if (df_sub['temperature'])
+                size = df_sub['temperature']*4,
+                
                 color = colors[i],
                 line = go.scattergeo.marker.Line(
                     width=0.5, color='rgb(40,40,40)'
                 ),
                 sizemode = 'area'
             ),
-            name = '{0} - {1}'.format(lim[0],lim[1]) )
+            name = '{0} - {1} miles/hour'.format(leg[0],leg[1]) )
         airports1.append(port)
 
     layout = go.Layout(
             title = go.layout.Title(
-                text = "Today's wind speed and temperature at airports in US"
+                text = "Today's wind speed and temperature at airports in US\nSize: Temperature\nColor: Wind Speed"
             ),
             showlegend = True,
             geo = go.layout.Geo(
@@ -137,14 +126,10 @@ if __name__ == "__main__":
     cur=conn.cursor()
     elev_dict=calc_avg_elev(conn,cur)
     top_elev_dict=sort_elev_top_ten(elev_dict)
-    write_calculation("calc.json",elev_dict)
+    
 
-    map_dict = avg_temp(conn,cur)
-    z = {}
-    z["elevation"] = elev_dict
-    z["map data"] = map_dict
-    write_calculation("calc.json",z)
-
-    bubble_map(map_dict)
+    map_dict = map_calc(conn,cur)
+    write_csv("calc.csv",map_dict,elev_dict)
+    bubble_map("calc.csv")
     barchart_avg_elev_by_state(top_elev_dict)
 

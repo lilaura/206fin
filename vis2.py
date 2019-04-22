@@ -26,19 +26,6 @@ def write_csv(calc_file, calc_lst, elev_dict):
         csv_out.writerow(['state', 'average elevation of airports'])
         for a,b in elev_dict.items():
             csv_out.writerow([a,b])
-    
-
-
-def calc_avg_elev(conn, cur):
-    cur.execute('SELECT state, elevation FROM Airports ORDER BY state')
-    avg_elev={}
-    for row in cur:
-        state=row[0]
-        elevation=row[1]
-        avg_elev[state]=avg_elev.get(state,[])+([elevation])
-    for key in avg_elev:
-        avg_elev[key]=sum(avg_elev[key])/len(avg_elev[key])
-    return avg_elev
 
 def map_calc(conn,cur):
     d = []
@@ -102,6 +89,17 @@ def bubble_map(csvfile):
     fig = go.Figure(data=airports1, layout=layout)
     py.plot(fig, filename='airports-bubblemap',auto_open = True)
 
+def calc_avg_elev(conn, cur):
+    cur.execute('SELECT state, elevation FROM Airports ORDER BY state')
+    avg_elev={}
+    for row in cur:
+        state=row[0]
+        elevation=row[1]
+        avg_elev[state]=avg_elev.get(state,[])+([elevation])
+    for key in avg_elev:
+        avg_elev[key]=sum(avg_elev[key])/len(avg_elev[key])
+    return avg_elev
+
 def sort_elev_top_ten(avg_elev):
     top_sort=sorted(avg_elev.items(),key=lambda t: t[1],reverse=True)
     return top_sort[:10]
@@ -124,9 +122,9 @@ def barchart_avg_elev_by_state(top_elev_dict):
 if __name__ == "__main__":
     conn=sqlite3.connect('db_fin_new.sqlite')
     cur=conn.cursor()
+
     elev_dict=calc_avg_elev(conn,cur)
     top_elev_dict=sort_elev_top_ten(elev_dict)
-    
 
     map_dict = map_calc(conn,cur)
     write_csv("calc.csv",map_dict,elev_dict)

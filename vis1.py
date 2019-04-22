@@ -77,7 +77,6 @@ if __name__ == "__main__":
     cur=conn.cursor()
     cur.execute('CREATE TABLE IF NOT EXISTS Airports (name TEXT, city TEXT, state TEXT, latitude REAL, longitude REAL, elevation REAL, time_zone TEXT)')
     cur.execute('CREATE TABLE IF NOT EXISTS Weather (latitude REAL, longitude REAL, precip_int REAL, wind_speed REAL, visibility REAL, temp_high REAL, temp_low REAL)')
-    get_airport_lst(flightAPI_id, flightAPI_key)
     airport_lst = get_airport_lst(flightAPI_id,flightAPI_key)
     longlatlist = add_airport_to_db(conn, cur, airport_lst)
     add_weather_to_db(conn, cur, longlatlist)

@@ -117,7 +117,7 @@ def barchart_avg_elev_by_state(top_elev_dict):
     ax.set_xlabel('State')
     ax.set_ylabel('Average elevation of all airports')
     ax.set_title('Top10 States in average airport elevation')
-    fig.savefig('Top10 States in average airport elevation.png')
+    fig.savefig('Top10States_avg_airport_elevation.png')
     plt.show()
 
 
